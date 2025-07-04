@@ -157,3 +157,33 @@ td button {
     align-items: center;
     justify-content: center;
 }
+.footer {
+  text-align: center;
+  padding: 15px 0;
+  font-size: 14px;
+  color: #666;
+  border-top: 1px solid #ddd;
+  margin-top: 40px;
+  background-color: #fafafa;
+}
+
+.footer a {
+  color: #4CAF50;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+.footer {
+  max-width: 350px;  /* mesma largura da .container */
+  margin: 40px auto 0 auto;
+  padding: 15px 0;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  border-top: 1px solid #ddd;
+  background-color: #fafafa;
+  border-radius: 12px;
+}
