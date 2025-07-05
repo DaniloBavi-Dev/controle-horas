@@ -22,8 +22,6 @@
         };
 
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
     </script>
 </head>
 <body>
@@ -98,31 +96,10 @@
 
     </div>
 
+    <footer class="footer">
+      Site criado por <a href="mailto:danilobavi.dev@gmail.com" target="_blank" rel="noopener noreferrer">Danilo Vieira</a>
+    </footer>
+
     <script src="script.js"></script>
-    <script>
-    const btnGoogle = document.getElementById('btn-google');
-    const telaLogin = document.getElementById('tela-login');
-    const telaSelecaoMes = document.getElementById('tela-selecao-mes');
-
-    let usuarioAtual = null;
-
-    btnGoogle.addEventListener('click', () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-            .then(result => {
-                usuarioAtual = result.user;
-                console.log("Logado como:", usuarioAtual.displayName);
-                telaLogin.style.display = 'none';
-                telaSelecaoMes.style.display = 'block';
-            })
-            .catch(error => {
-                console.error("Erro no login:", error);
-                alert("Falha no login. Verifique as permissões do Firebase.");
-            });
-    });
-</script>
 </body>
-<footer class="footer">
-  Site criado por <a href="mailto:danilobavi.dev@gmail.com" target="_blank" rel="noopener noreferrer">Danilo Vieira</a>
-</footer>
 </html>
