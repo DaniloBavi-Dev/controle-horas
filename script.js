@@ -134,7 +134,7 @@ function calcularMinutosNoturnos(inicioMin, fimMin) {
     const inicioNoite1 = 23 * 60; // 1380min
     const fimNoite1 = 24 * 60;    // 1440min
     const inicioNoite2 = 0;
-    const fimNoite2 = 6 * 60;     // 360min
+    const fimNoite2 = 5 * 60;     // 300min
 
     for (let minuto = inicioMin; minuto < fimMin; minuto++) {
         const minutoDoDia = minuto % (24 * 60);
