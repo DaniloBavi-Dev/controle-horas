@@ -1,8 +1,6 @@
-const telaLogin = document.getElementById('tela-login');
 const telaSelecaoMes = document.getElementById('tela-selecao-mes');
 const telaRegistroHoras = document.getElementById('tela-registro-horas');
 
-const btnLogin = document.getElementById('btn-login');
 const btnConfirmarMes = document.getElementById('btn-confirmar-mes');
 const btnVoltar = document.getElementById('btn-voltar');
 const mesAtualSpan = document.getElementById('mes-atual');
@@ -13,20 +11,13 @@ const formAdicionar = document.getElementById('form-adicionar');
 const btnSalvarRegistro = document.getElementById('btn-salvar-registro');
 const tabelaHoras = document.getElementById('tabela-horas');
 
-const usuarioCorreto = "admin";
-const senhaCorreta = "1234";
-
 let mesSelecionadoAtual = null;
+let usuarioAtual = null;
 
-btnLogin.addEventListener('click', () => {
-    const usuario = document.getElementById('usuario').value;
-    const senha = document.getElementById('senha').value;
-
-    if (usuario === usuarioCorreto && senha === senhaCorreta) {
-        telaLogin.style.display = 'none';
+firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+        usuarioAtual = user;
         telaSelecaoMes.style.display = 'block';
-    } else {
-        alert('Usuário ou senha incorretos!');
     }
 });
 
@@ -190,7 +181,7 @@ function atualizarTotalHoras() {
 }
 
 function salvarDados() {
-    if (!mesSelecionadoAtual) return;
+    if (!mesSelecionadoAtual || !usuarioAtual) return;
 
     const linhas = tabelaHoras.querySelectorAll('tr');
     const registros = [];
@@ -203,27 +194,37 @@ function salvarDados() {
         });
     });
 
-    let dadosStorage = JSON.parse(localStorage.getItem('registrosHorasPorMes')) || {};
-
-    dadosStorage[mesSelecionadoAtual] = registros;
-
-    localStorage.setItem('registrosHorasPorMes', JSON.stringify(dadosStorage));
+    firebase.firestore()
+        .collection("usuarios")
+        .doc(usuarioAtual.uid)
+        .collection("registros")
+        .doc(mesSelecionadoAtual)
+        .set({ registros })
+        .then(() => console.log("Dados salvos no Firestore"))
+        .catch(erro => console.error("Erro ao salvar:", erro));
 }
 
 function carregarDados() {
     tabelaHoras.innerHTML = '';
 
-    if (!mesSelecionadoAtual) return;
+    if (!mesSelecionadoAtual || !usuarioAtual) return;
 
-    const dadosStorage = JSON.parse(localStorage.getItem('registrosHorasPorMes')) || {};
-
-    const registros = dadosStorage[mesSelecionadoAtual] || [];
-
-    registros.forEach(reg => {
-        adicionarLinhaTabela(reg.dia, reg.inicio, reg.fim);
-    });
-
-    atualizarTotalHoras();
+    firebase.firestore()
+        .collection("usuarios")
+        .doc(usuarioAtual.uid)
+        .collection("registros")
+        .doc(mesSelecionadoAtual)
+        .get()
+        .then(doc => {
+            if (doc.exists) {
+                const registros = doc.data().registros || [];
+                registros.forEach(reg => {
+                    adicionarLinhaTabela(reg.dia, reg.inicio, reg.fim);
+                });
+                atualizarTotalHoras();
+            }
+        })
+        .catch(erro => console.error("Erro ao carregar dados:", erro));
 }
 
 function nomeMes(numeroMes) {
