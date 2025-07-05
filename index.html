@@ -28,40 +28,38 @@
 
     <div class="container">
         
+        <!-- Tela de Login apenas com Google -->
         <section id="tela-login">
-    <h2><i class="fas fa-clock"></i> Controle de Carga Horária</h2>
-    
-    <button id="btn-google" style="width: 100%; margin-top: 20px;">
-        <i class="fab fa-google"></i> Entrar com Google
-    </button>
-</section>
-
-
-        <section id="tela-selecao-mes" style="display: none;">
-    <h2><i class="fas fa-calendar-alt"></i> Selecione o Mês</h2>
-    <select id="selecao-mes">
-        <option value="01">Janeiro</option>
-        <option value="02">Fevereiro</option>
-        <option value="03">Março</option>
-        <option value="04">Abril</option>
-        <option value="05">Maio</option>
-        <option value="06">Junho</option>
-        <option value="07">Julho</option>
-        <option value="08">Agosto</option>
-        <option value="09">Setembro</option>
-        <option value="10">Outubro</option>
-        <option value="11">Novembro</option>
-        <option value="12">Dezembro</option>
-    </select>
-    <button id="btn-confirmar-mes"><i class="fas fa-check"></i> Confirmar</button>
-    <button id="btn-sair" style="background-color: #e53935; margin-top: 15px;">
-        <i class="fas fa-sign-out-alt"></i> Sair
-    </button>
-</section>
-
-            <button id="btn-confirmar-mes"><i class="fas fa-check"></i> Confirmar</button>
+            <h2><i class="fas fa-clock"></i> Controle de Carga Horária</h2>
+            <button id="btn-google" style="width: 100%; margin-top: 20px;">
+                <i class="fab fa-google"></i> Entrar com Google
+            </button>
         </section>
 
+        <!-- Seleção de Mês -->
+        <section id="tela-selecao-mes" style="display: none;">
+            <h2><i class="fas fa-calendar-alt"></i> Selecione o Mês</h2>
+            <select id="selecao-mes">
+                <option value="01">Janeiro</option>
+                <option value="02">Fevereiro</option>
+                <option value="03">Março</option>
+                <option value="04">Abril</option>
+                <option value="05">Maio</option>
+                <option value="06">Junho</option>
+                <option value="07">Julho</option>
+                <option value="08">Agosto</option>
+                <option value="09">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+            <button id="btn-confirmar-mes"><i class="fas fa-check"></i> Confirmar</button>
+            <button id="btn-sair" style="background-color: #e53935; margin-top: 15px;">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
+        </section>
+
+        <!-- Registro de Horas -->
         <section id="tela-registro-horas" style="display: none;">
             <h2><i class="fas fa-clock"></i> Registro de Horas - <span id="mes-atual"></span></h2>
             <button id="btn-voltar"><i class="fas fa-arrow-left"></i> Voltar</button>
@@ -104,7 +102,7 @@
     </div>
 
     <footer class="footer">
-      Site criado por <a href="mailto:danilobavi.dev@gmail.com" target="_blank" rel="noopener noreferrer">Danilo Vieira</a>
+        Site criado por <a href="mailto:danilobavi.dev@gmail.com" target="_blank" rel="noopener noreferrer">Danilo Vieira</a>
     </footer>
 
     <script src="script.js"></script>
