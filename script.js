@@ -131,11 +131,18 @@ function calcularHoras(inicio, fim) {
 
 function calcularMinutosNoturnos(inicioMin, fimMin) {
     let minutosNoturnos = 0;
-    const inicioNoite = 0;
-    const fimNoite = 6 * 60;
+    const inicioNoite1 = 23 * 60; // 1380min
+    const fimNoite1 = 24 * 60;    // 1440min
+    const inicioNoite2 = 0;
+    const fimNoite2 = 6 * 60;     // 360min
+
     for (let minuto = inicioMin; minuto < fimMin; minuto++) {
         const minutoDoDia = minuto % (24 * 60);
-        if (minutoDoDia >= inicioNoite && minutoDoDia < fimNoite) minutosNoturnos++;
+
+        if ((minutoDoDia >= inicioNoite1 && minutoDoDia < fimNoite1) ||
+            (minutoDoDia >= inicioNoite2 && minutoDoDia < fimNoite2)) {
+            minutosNoturnos++;
+        }
     }
     return minutosNoturnos;
 }
