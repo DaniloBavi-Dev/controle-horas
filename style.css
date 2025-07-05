@@ -1,3 +1,4 @@
+/* Reset básico */
 * {
     box-sizing: border-box;
 }
@@ -9,9 +10,17 @@ body {
     padding: 20px;
 }
 
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 section {
+    width: 100%;
     max-width: 420px;
-    margin: 60px auto;
+    margin: 40px auto;
     background-color: #fff;
     padding: 25px;
     border-radius: 12px;
@@ -41,7 +50,6 @@ input, select {
     transition: border-color 0.3s;
 }
 
-
 input:focus, select:focus {
     border-color: #4CAF50;
     outline: none;
@@ -58,6 +66,7 @@ button {
     font-size: 16px;
     font-weight: bold;
     transition: background-color 0.3s;
+    margin-top: 10px;
 }
 
 button:hover {
@@ -69,6 +78,14 @@ button:hover {
 }
 
 #btn-voltar:hover {
+    background-color: #d32f2f;
+}
+
+#btn-sair {
+    background-color: #e53935;
+}
+
+#btn-sair:hover {
     background-color: #d32f2f;
 }
 
@@ -145,6 +162,27 @@ td button {
     color: #d32f2f;
 }
 
+.footer {
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    color: #666;
+    border-top: 1px solid #ddd;
+    margin-top: 40px;
+    background-color: #fafafa;
+}
+
+.footer a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsividade para dispositivos móveis */
 @media (max-width: 500px) {
     section {
         margin: 20px;
@@ -152,43 +190,20 @@ td button {
     }
 
     table th, table td {
-        font-size: 14px;
+        font-size: 13px;
         padding: 8px;
     }
-}
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-.footer {
-  text-align: center;
-  padding: 15px 0;
-  font-size: 14px;
-  color: #666;
-  border-top: 1px solid #ddd;
-  margin-top: 40px;
-  background-color: #fafafa;
-}
 
-.footer a {
-  color: #4CAF50;
-  text-decoration: none;
-  font-weight: 600;
-}
+    h2 {
+        font-size: 20px;
+    }
 
-.footer a:hover {
-  text-decoration: underline;
-}
-.footer {
-  max-width: 350px;  /* mesma largura da .container */
-  margin: 40px auto 0 auto;
-  padding: 15px 0;
-  text-align: center;
-  font-size: 14px;
-  color: #666;
-  border-top: 1px solid #ddd;
-  background-color: #fafafa;
-  border-radius: 12px;
+    h3 {
+        font-size: 18px;
+    }
+
+    button {
+        font-size: 15px;
+        padding: 10px;
+    }
 }
