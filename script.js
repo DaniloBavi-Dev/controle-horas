@@ -10,6 +10,7 @@ const btnAdicionarDia = document.getElementById('btn-adicionar-dia');
 const formAdicionar = document.getElementById('form-adicionar');
 const btnSalvarRegistro = document.getElementById('btn-salvar-registro');
 const tabelaHoras = document.getElementById('tabela-horas');
+const btnSair = document.getElementById('btn-sair');
 
 let usuarioAtual = null;
 let mesSelecionadoAtual = null;
@@ -64,6 +65,16 @@ btnSalvarRegistro.addEventListener('click', () => {
     formAdicionar.style.display = 'none';
     atualizarTotalHoras();
     salvarDados();
+});
+
+btnSair.addEventListener('click', () => {
+    firebase.auth().signOut()
+        .then(() => {
+            location.reload();
+        })
+        .catch(erro => {
+            console.error("Erro ao sair:", erro);
+        });
 });
 
 function adicionarLinhaTabela(dia, horaInicio, horaFim) {
