@@ -1,98 +1,130 @@
 <!-- index.html atualizado -->
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Controle de Carga Horária</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://kit.fontawesome.com/a2d4b9492d.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css" />
+    <script
+      src="https://kit.fontawesome.com/a2d4b9492d.js"
+      crossorigin="anonymous"
+    ></script>
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyANWPFxyF02-DJX6omgNObylhpMQsqmfC8",
-            authDomain: "controle-horas-8a41d.firebaseapp.com",
-            projectId: "controle-horas-8a41d",
-            storageBucket: "controle-horas-8a41d.appspot.com",
-            messagingSenderId: "463084005622",
-            appId: "1:463084005622:web:23f0678a2f3f08241f24d7"
-        };
-        firebase.initializeApp(firebaseConfig);
+      const firebaseConfig = {
+        apiKey: "AIzaSyANWPFxyF02-DJX6omgNObylhpMQsqmfC8",
+        authDomain: "controle-horas-8a41d.firebaseapp.com",
+        projectId: "controle-horas-8a41d",
+        storageBucket: "controle-horas-8a41d.appspot.com",
+        messagingSenderId: "463084005622",
+        appId: "1:463084005622:web:23f0678a2f3f08241f24d7",
+      };
+      firebase.initializeApp(firebaseConfig);
     </script>
-</head>
-<body>
-
-<div class="container">
-    <section id="tela-login">
+  </head>
+  <body>
+    <div class="container">
+      <section id="tela-login">
         <h2><i class="fas fa-clock"></i> Controle de Carga Horária</h2>
-        <button id="btn-google"><i class="fab fa-google"></i> Entrar com Google</button>
-    </section>
+        <button id="btn-google">
+          <i class="fab fa-google"></i> Entrar com Google
+        </button>
+      </section>
 
-    <section id="tela-selecao-mes" style="display:none;">
+      <section id="tela-selecao-mes" style="display: none">
         <h2><i class="fas fa-calendar-alt"></i> Selecione o Mês</h2>
         <select id="selecao-mes">
-            <option value="01">Janeiro</option>
-            <option value="02">Fevereiro</option>
-            <option value="03">Março</option>
-            <option value="04">Abril</option>
-            <option value="05">Maio</option>
-            <option value="06">Junho</option>
-            <option value="07">Julho</option>
-            <option value="08">Agosto</option>
-            <option value="09">Setembro</option>
-            <option value="10">Outubro</option>
-            <option value="11">Novembro</option>
-            <option value="12">Dezembro</option>
+          <option value="01">Janeiro</option>
+          <option value="02">Fevereiro</option>
+          <option value="03">Março</option>
+          <option value="04">Abril</option>
+          <option value="05">Maio</option>
+          <option value="06">Junho</option>
+          <option value="07">Julho</option>
+          <option value="08">Agosto</option>
+          <option value="09">Setembro</option>
+          <option value="10">Outubro</option>
+          <option value="11">Novembro</option>
+          <option value="12">Dezembro</option>
         </select>
-        <button id="btn-confirmar-mes"><i class="fas fa-check"></i> Confirmar</button>
+        <button id="btn-confirmar-mes">
+          <i class="fas fa-check"></i> Confirmar
+        </button>
         <button id="btn-sair"><i class="fas fa-sign-out-alt"></i> Sair</button>
-    </section>
+      </section>
 
-    <section id="tela-registro-horas" style="display:none;">
-        <h2><i class="fas fa-clock"></i> Registro de Horas - <span id="mes-atual"></span></h2>
-        <button id="btn-voltar"><i class="fas fa-arrow-left"></i> Voltar</button>
+      <section id="tela-registro-horas" style="display: none">
+        <h2>
+          <i class="fas fa-clock"></i> Registro de Horas -
+          <span id="mes-atual"></span>
+        </h2>
+        <button id="btn-voltar">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </button>
 
-        <label for="saldo-anterior">Saldo do mês anterior (em minutos, negativo ou positivo):</label>
-        <input type="number" id="saldo-anterior" placeholder="Ex: -120 ou 60">
+        <label for="saldo-anterior"
+          >Saldo do mês anterior (HH:mm ou -HH:mm):</label
+        >
+        <div id="saldo-container">
+          <input
+            type="text"
+            id="saldo-anterior"
+            placeholder="Ex: 2:30 ou -1:45"
+          />
+          <button id="btn-salvar-saldo">Salvar Saldo</button>
+          <button id="btn-editar-saldo" style="display: none">
+            Editar Saldo
+          </button>
+        </div>
 
         <table>
-            <thead>
+          <thead>
             <tr>
-                <th>Dia</th>
-                <th>Início</th>
-                <th>Fim</th>
-                <th>Total</th>
-                <th>Ações</th>
+              <th>Dia</th>
+              <th>Início</th>
+              <th>Fim</th>
+              <th>Total</th>
+              <th>Ações</th>
             </tr>
-            </thead>
-            <tbody id="tabela-horas"></tbody>
+          </thead>
+          <tbody id="tabela-horas"></tbody>
         </table>
 
-        <button id="btn-adicionar-dia"><i class="fas fa-plus"></i> Adicionar Registro</button>
+        <button id="btn-adicionar-dia">
+          <i class="fas fa-plus"></i> Adicionar Registro
+        </button>
 
-        <div id="form-adicionar" style="display:none;">
-            <h3><i class="fas fa-pencil-alt"></i> Adicionar Registro</h3>
-            <label for="dia">Dia:</label>
-            <input type="number" id="dia" min="1" max="31">
-            <label for="hora-inicio">Hora Início:</label>
-            <input type="time" id="hora-inicio">
-            <label for="hora-fim">Hora Fim:</label>
-            <input type="time" id="hora-fim">
-            <button id="btn-salvar-registro"><i class="fas fa-save"></i> Salvar</button>
+        <div id="form-adicionar" style="display: none">
+          <h3><i class="fas fa-pencil-alt"></i> Adicionar Registro</h3>
+          <label for="dia">Dia:</label>
+          <input type="number" id="dia" min="1" max="31" />
+          <label for="hora-inicio">Hora Início:</label>
+          <input type="time" id="hora-inicio" />
+          <label for="hora-fim">Hora Fim:</label>
+          <input type="time" id="hora-fim" />
+          <button id="btn-salvar-registro">
+            <i class="fas fa-save"></i> Salvar
+          </button>
         </div>
 
         <div id="resumo">
-            <p>Total de horas trabalhadas: <span id="total-horas">0h 0min</span></p>
-            <p>Horas faltantes ou excedentes: <span id="horas-faltantes">0</span></p>
+          <p>
+            Total de horas trabalhadas: <span id="total-horas">0h 0min</span>
+          </p>
+          <p>
+            Horas faltantes ou excedentes: <span id="horas-faltantes">0</span>
+          </p>
         </div>
-    </section>
+      </section>
 
-    <footer class="footer">
-        Site criado por <a href="mailto:danilobavi.dev@gmail.com">Danilo Vieira</a>
-    </footer>
-</div>
+      <footer class="footer">
+        Site criado por
+        <a href="mailto:danilobavi.dev@gmail.com">Danilo Vieira</a>
+      </footer>
+    </div>
 
-<script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
