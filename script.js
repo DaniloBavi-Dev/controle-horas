@@ -249,3 +249,55 @@ function converterMinutosParaHora(minutos) {
     const m = minutos % 60;
     return `${negativo ? '-' : ''}${h}:${m.toString().padStart(2, '0')}`;
 }
+const btnRelatorio = document.getElementById('btn-relatorio');
+
+btnRelatorio.addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Título
+    doc.setFontSize(18);
+    doc.text(`Relatório de Horas - ${nomeMes(mesSelecionadoAtual)}`, 15, 20);
+
+    // Saldo e Resumo
+    doc.setFontSize(12);
+    const saldoTexto = saldoAnteriorInput.value || '0:00';
+    const totalHoras = document.getElementById('total-horas').textContent;
+    const resumoTexto = document.getElementById('horas-faltantes').textContent;
+
+    doc.text(`Saldo do mês anterior: ${saldoTexto}`, 15, 35);
+    doc.text(`Total de horas trabalhadas: ${totalHoras}`, 15, 45);
+    doc.text(`Resumo: ${resumoTexto}`, 15, 55);
+
+    // Cabeçalho da tabela
+    let y = 70;
+    doc.text('Dia', 15, y);
+    doc.text('Início', 40, y);
+    doc.text('Fim', 70, y);
+    doc.text('Total', 100, y);
+
+    y += 10;
+
+    // Dados da tabela
+    tabelaHoras.querySelectorAll('tr').forEach(linha => {
+        const dia = linha.children[0].textContent;
+        const inicio = linha.children[1].textContent;
+        const fim = linha.children[2].textContent;
+        const total = linha.children[3].textContent;
+
+        doc.text(dia, 15, y);
+        doc.text(inicio, 40, y);
+        doc.text(fim, 70, y);
+        doc.text(total, 100, y);
+        y += 10;
+
+        // Quebra de página se necessário
+        if (y > 280) {
+            doc.addPage();
+            y = 20;
+        }
+    });
+
+    // Salvar o PDF
+    doc.save(`Relatorio-${nomeMes(mesSelecionadoAtual)}.pdf`);
+});
