@@ -1,4 +1,4 @@
-/* Reset básico */
+/* style.css atualizado completo */
 * {
     box-sizing: border-box;
 }
@@ -52,13 +52,15 @@ input, select {
     transition: border-color 0.3s;
 }
 
-#saldo-anterior {
+#saldo-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
     margin-bottom: 20px;
 }
 
-input:focus, select:focus {
-    border-color: #4CAF50;
-    outline: none;
+#saldo-anterior {
+    flex: 1;
 }
 
 button {
@@ -85,6 +87,13 @@ button:hover {
 
 #btn-voltar:hover, #btn-sair:hover {
     background-color: #d32f2f;
+}
+
+#btn-salvar-saldo, #btn-editar-saldo {
+    width: auto;
+    padding: 10px 15px;
+    margin: 0;
+    font-size: 14px;
 }
 
 table {
@@ -175,7 +184,6 @@ td button {
     border-radius: 0 0 12px 12px;
 }
 
-/* Responsividade para telas pequenas */
 @media (max-width: 400px) {
     section {
         margin: 20px;

@@ -1,4 +1,4 @@
-// script.js atualizado
+// script.js atualizado completo
 const btnGoogle = document.getElementById('btn-google');
 const telaLogin = document.getElementById('tela-login');
 const telaSelecaoMes = document.getElementById('tela-selecao-mes');
@@ -13,9 +13,12 @@ const btnSalvarRegistro = document.getElementById('btn-salvar-registro');
 const tabelaHoras = document.getElementById('tabela-horas');
 const btnSair = document.getElementById('btn-sair');
 const saldoAnteriorInput = document.getElementById('saldo-anterior');
+const btnSalvarSaldo = document.getElementById('btn-salvar-saldo');
+const btnEditarSaldo = document.getElementById('btn-editar-saldo');
 
 let usuarioAtual = null;
 let mesSelecionadoAtual = null;
+let saldoMinutos = 0;
 
 btnGoogle.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -73,9 +76,24 @@ btnSair.addEventListener('click', () => {
     firebase.auth().signOut().then(() => location.reload());
 });
 
-saldoAnteriorInput.addEventListener('change', () => {
+btnSalvarSaldo.addEventListener('click', () => {
+    const valor = saldoAnteriorInput.value.trim();
+    if (!validarFormatoHora(valor)) {
+        alert('Formato inválido! Use HH:mm ou -HH:mm');
+        return;
+    }
+    saldoMinutos = converterHoraParaMinutos(valor);
+    saldoAnteriorInput.disabled = true;
+    btnSalvarSaldo.style.display = 'none';
+    btnEditarSaldo.style.display = 'inline-block';
     atualizarTotalHoras();
     salvarDados();
+});
+
+btnEditarSaldo.addEventListener('click', () => {
+    saldoAnteriorInput.disabled = false;
+    btnSalvarSaldo.style.display = 'inline-block';
+    btnEditarSaldo.style.display = 'none';
 });
 
 function adicionarLinhaTabela(dia, horaInicio, horaFim) {
@@ -136,7 +154,7 @@ function calcularMinutosNoturnos(inicio, fim) {
 
 function atualizarTotalHoras() {
     const linhas = tabelaHoras.querySelectorAll('tr');
-    let totalMin = parseInt(saldoAnteriorInput.value) || 0;
+    let totalMin = saldoMinutos;
 
     linhas.forEach(linha => {
         const match = linha.children[3].textContent.match(/(\d+)h\s*(\d+)min/);
@@ -174,12 +192,16 @@ function salvarDados() {
 
     firebase.firestore().collection('usuarios').doc(usuarioAtual.uid)
         .collection('registros').doc(mesSelecionadoAtual)
-        .set({ registros, saldo: parseInt(saldoAnteriorInput.value) || 0 });
+        .set({ registros, saldo: saldoMinutos });
 }
 
 function carregarDados() {
     tabelaHoras.innerHTML = '';
     saldoAnteriorInput.value = '';
+    saldoMinutos = 0;
+    saldoAnteriorInput.disabled = false;
+    btnSalvarSaldo.style.display = 'inline-block';
+    btnEditarSaldo.style.display = 'none';
 
     firebase.firestore().collection('usuarios').doc(usuarioAtual.uid)
         .collection('registros').doc(mesSelecionadoAtual)
@@ -188,7 +210,11 @@ function carregarDados() {
             if (doc.exists) {
                 const dados = doc.data();
                 (dados.registros || []).forEach(reg => adicionarLinhaTabela(reg.dia, reg.inicio, reg.fim));
-                saldoAnteriorInput.value = dados.saldo || 0;
+                saldoMinutos = dados.saldo || 0;
+                saldoAnteriorInput.value = converterMinutosParaHora(saldoMinutos);
+                saldoAnteriorInput.disabled = true;
+                btnSalvarSaldo.style.display = 'none';
+                btnEditarSaldo.style.display = 'inline-block';
             }
             atualizarTotalHoras();
         });
@@ -202,3 +228,21 @@ function nomeMes(m) {
     }[m] || 'Mês inválido';
 }
 
+function validarFormatoHora(valor) {
+    return /^-?\d{1,2}:\d{2}$/.test(valor);
+}
+
+function converterHoraParaMinutos(valor) {
+    const negativo = valor.startsWith('-');
+    const partes = valor.replace('-', '').split(':');
+    let minutos = parseInt(partes[0]) * 60 + parseInt(partes[1]);
+    return negativo ? -minutos : minutos;
+}
+
+function converterMinutosParaHora(minutos) {
+    const negativo = minutos < 0;
+    minutos = Math.abs(minutos);
+    const h = Math.floor(minutos / 60);
+    const m = minutos % 60;
+    return `${negativo ? '-' : ''}${h}:${m.toString().padStart(2, '0')}`;
+}
