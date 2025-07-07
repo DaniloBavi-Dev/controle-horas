@@ -1,3 +1,4 @@
+// script.js atualizado completo com correção e botão de PDF
 const btnGoogle = document.getElementById('btn-google');
 const telaLogin = document.getElementById('tela-login');
 const telaSelecaoMes = document.getElementById('tela-selecao-mes');
@@ -14,11 +15,11 @@ const btnSair = document.getElementById('btn-sair');
 const saldoAnteriorInput = document.getElementById('saldo-anterior');
 const btnSalvarSaldo = document.getElementById('btn-salvar-saldo');
 const btnEditarSaldo = document.getElementById('btn-editar-saldo');
+const btnRelatorio = document.getElementById('btn-relatorio');
 
 let usuarioAtual = null;
 let mesSelecionadoAtual = null;
 let saldoMinutos = 0;
-let metaMinutos = 160 * 60;
 
 btnGoogle.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -83,7 +84,6 @@ btnSalvarSaldo.addEventListener('click', () => {
         return;
     }
     saldoMinutos = converterHoraParaMinutos(valor);
-    metaMinutos = 160 * 60 + saldoMinutos;
     saldoAnteriorInput.disabled = true;
     btnSalvarSaldo.style.display = 'none';
     btnEditarSaldo.style.display = 'inline-block';
@@ -95,6 +95,50 @@ btnEditarSaldo.addEventListener('click', () => {
     saldoAnteriorInput.disabled = false;
     btnSalvarSaldo.style.display = 'inline-block';
     btnEditarSaldo.style.display = 'none';
+});
+
+btnRelatorio.addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text(`Relatório de Horas - ${nomeMes(mesSelecionadoAtual)}`, 15, 20);
+
+    doc.setFontSize(12);
+    const saldoTexto = saldoAnteriorInput.value || '0:00';
+    const totalHoras = document.getElementById('total-horas').textContent;
+    const resumoTexto = document.getElementById('horas-faltantes').textContent;
+
+    doc.text(`Saldo do mês anterior: ${saldoTexto}`, 15, 35);
+    doc.text(`Total de horas trabalhadas: ${totalHoras}`, 15, 45);
+    doc.text(`Resumo: ${resumoTexto}`, 15, 55);
+
+    let y = 70;
+    doc.text('Dia', 15, y);
+    doc.text('Início', 40, y);
+    doc.text('Fim', 70, y);
+    doc.text('Total', 100, y);
+    y += 10;
+
+    tabelaHoras.querySelectorAll('tr').forEach(linha => {
+        const dia = linha.children[0].textContent;
+        const inicio = linha.children[1].textContent;
+        const fim = linha.children[2].textContent;
+        const total = linha.children[3].textContent;
+
+        doc.text(dia, 15, y);
+        doc.text(inicio, 40, y);
+        doc.text(fim, 70, y);
+        doc.text(total, 100, y);
+        y += 10;
+
+        if (y > 280) {
+            doc.addPage();
+            y = 20;
+        }
+    });
+
+    doc.save(`Relatorio-${nomeMes(mesSelecionadoAtual)}.pdf`);
 });
 
 function adicionarLinhaTabela(dia, horaInicio, horaFim) {
@@ -155,18 +199,20 @@ function calcularMinutosNoturnos(inicio, fim) {
 
 function atualizarTotalHoras() {
     const linhas = tabelaHoras.querySelectorAll('tr');
-    let totalMin = 0;
+    let totalMinTrabalhado = 0;
 
     linhas.forEach(linha => {
         const match = linha.children[3].textContent.match(/(\d+)h\s*(\d+)min/);
-        if (match) totalMin += parseInt(match[1]) * 60 + parseInt(match[2]);
+        if (match) totalMinTrabalhado += parseInt(match[1]) * 60 + parseInt(match[2]);
     });
 
-    const horas = Math.floor(totalMin / 60);
-    const min = totalMin % 60;
+    const horas = Math.floor(totalMinTrabalhado / 60);
+    const min = totalMinTrabalhado % 60;
     document.getElementById('total-horas').textContent = `${horas}h ${min}min`;
 
-    const diff = totalMin - metaMinutos;
+    const meta = 160 * 60;
+    const diff = totalMinTrabalhado + saldoMinutos - meta;
+
     const campo = document.getElementById('horas-faltantes');
     campo.className = '';
 
@@ -200,7 +246,6 @@ function carregarDados() {
     tabelaHoras.innerHTML = '';
     saldoAnteriorInput.value = '';
     saldoMinutos = 0;
-    metaMinutos = 160 * 60;
     saldoAnteriorInput.disabled = false;
     btnSalvarSaldo.style.display = 'inline-block';
     btnEditarSaldo.style.display = 'none';
@@ -213,7 +258,6 @@ function carregarDados() {
                 const dados = doc.data();
                 (dados.registros || []).forEach(reg => adicionarLinhaTabela(reg.dia, reg.inicio, reg.fim));
                 saldoMinutos = dados.saldo || 0;
-                metaMinutos = 160 * 60 + saldoMinutos;
                 saldoAnteriorInput.value = converterMinutosParaHora(saldoMinutos);
                 saldoAnteriorInput.disabled = true;
                 btnSalvarSaldo.style.display = 'none';
@@ -249,55 +293,3 @@ function converterMinutosParaHora(minutos) {
     const m = minutos % 60;
     return `${negativo ? '-' : ''}${h}:${m.toString().padStart(2, '0')}`;
 }
-const btnRelatorio = document.getElementById('btn-relatorio');
-
-btnRelatorio.addEventListener('click', () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    // Título
-    doc.setFontSize(18);
-    doc.text(`Relatório de Horas - ${nomeMes(mesSelecionadoAtual)}`, 15, 20);
-
-    // Saldo e Resumo
-    doc.setFontSize(12);
-    const saldoTexto = saldoAnteriorInput.value || '0:00';
-    const totalHoras = document.getElementById('total-horas').textContent;
-    const resumoTexto = document.getElementById('horas-faltantes').textContent;
-
-    doc.text(`Saldo do mês anterior: ${saldoTexto}`, 15, 35);
-    doc.text(`Total de horas trabalhadas: ${totalHoras}`, 15, 45);
-    doc.text(`Resumo: ${resumoTexto}`, 15, 55);
-
-    // Cabeçalho da tabela
-    let y = 70;
-    doc.text('Dia', 15, y);
-    doc.text('Início', 40, y);
-    doc.text('Fim', 70, y);
-    doc.text('Total', 100, y);
-
-    y += 10;
-
-    // Dados da tabela
-    tabelaHoras.querySelectorAll('tr').forEach(linha => {
-        const dia = linha.children[0].textContent;
-        const inicio = linha.children[1].textContent;
-        const fim = linha.children[2].textContent;
-        const total = linha.children[3].textContent;
-
-        doc.text(dia, 15, y);
-        doc.text(inicio, 40, y);
-        doc.text(fim, 70, y);
-        doc.text(total, 100, y);
-        y += 10;
-
-        // Quebra de página se necessário
-        if (y > 280) {
-            doc.addPage();
-            y = 20;
-        }
-    });
-
-    // Salvar o PDF
-    doc.save(`Relatorio-${nomeMes(mesSelecionadoAtual)}.pdf`);
-});
