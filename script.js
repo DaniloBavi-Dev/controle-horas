@@ -1,3 +1,4 @@
+// script.js atualizado
 const btnGoogle = document.getElementById('btn-google');
 const telaLogin = document.getElementById('tela-login');
 const telaSelecaoMes = document.getElementById('tela-selecao-mes');
@@ -11,6 +12,7 @@ const formAdicionar = document.getElementById('form-adicionar');
 const btnSalvarRegistro = document.getElementById('btn-salvar-registro');
 const tabelaHoras = document.getElementById('tabela-horas');
 const btnSair = document.getElementById('btn-sair');
+const saldoAnteriorInput = document.getElementById('saldo-anterior');
 
 let usuarioAtual = null;
 let mesSelecionadoAtual = null;
@@ -25,7 +27,7 @@ btnGoogle.addEventListener('click', () => {
         })
         .catch(error => {
             console.error("Erro no login:", error);
-            alert("Falha no login. Verifique as permissões do Firebase.");
+            alert("Falha no login.");
         });
 });
 
@@ -68,18 +70,16 @@ btnSalvarRegistro.addEventListener('click', () => {
 });
 
 btnSair.addEventListener('click', () => {
-    firebase.auth().signOut()
-        .then(() => {
-            location.reload();
-        })
-        .catch(erro => {
-            console.error("Erro ao sair:", erro);
-        });
+    firebase.auth().signOut().then(() => location.reload());
+});
+
+saldoAnteriorInput.addEventListener('change', () => {
+    atualizarTotalHoras();
+    salvarDados();
 });
 
 function adicionarLinhaTabela(dia, horaInicio, horaFim) {
     const horasTrabalhadas = calcularHoras(horaInicio, horaFim);
-
     const novaLinha = document.createElement('tr');
     novaLinha.innerHTML = `
         <td>${dia}</td>
@@ -94,7 +94,7 @@ function adicionarLinhaTabela(dia, horaInicio, horaFim) {
     tabelaHoras.appendChild(novaLinha);
 
     novaLinha.querySelector('.btn-excluir').addEventListener('click', () => {
-        if (confirm('Deseja realmente excluir este registro?')) {
+        if (confirm('Deseja excluir?')) {
             novaLinha.remove();
             atualizarTotalHoras();
             salvarDados();
@@ -115,76 +115,56 @@ function adicionarLinhaTabela(dia, horaInicio, horaFim) {
 function calcularHoras(inicio, fim) {
     const [hInicio, mInicio] = inicio.split(':').map(Number);
     const [hFim, mFim] = fim.split(':').map(Number);
-    let inicioMinutos = hInicio * 60 + mInicio;
-    let fimMinutos = hFim * 60 + mFim;
-    if (fimMinutos < inicioMinutos) fimMinutos += 24 * 60;
+    let inicioMin = hInicio * 60 + mInicio;
+    let fimMin = hFim * 60 + mFim;
+    if (fimMin < inicioMin) fimMin += 24 * 60;
 
-    let minutosTrabalhados = fimMinutos - inicioMinutos;
-    const minutosNoturnos = calcularMinutosNoturnos(inicioMinutos, fimMinutos);
-    const minutosAdicional = Math.floor(minutosNoturnos / 60) * 10;
-    minutosTrabalhados += minutosAdicional;
+    let minutos = fimMin - inicioMin;
+    minutos += Math.floor(calcularMinutosNoturnos(inicioMin, fimMin) / 60) * 10;
 
-    const horas = Math.floor(minutosTrabalhados / 60);
-    const minutos = minutosTrabalhados % 60;
-    return `${horas}h ${minutos}min`;
+    return `${Math.floor(minutos / 60)}h ${minutos % 60}min`;
 }
 
-function calcularMinutosNoturnos(inicioMin, fimMin) {
-    let minutosNoturnos = 0;
-    const inicioNoite1 = 23 * 60; // 1380min
-    const fimNoite1 = 24 * 60;    // 1440min
-    const inicioNoite2 = 0;
-    const fimNoite2 = 5 * 60;     // 300min
-
-    for (let minuto = inicioMin; minuto < fimMin; minuto++) {
-        const minutoDoDia = minuto % (24 * 60);
-
-        if ((minutoDoDia >= inicioNoite1 && minutoDoDia < fimNoite1) ||
-            (minutoDoDia >= inicioNoite2 && minutoDoDia < fimNoite2)) {
-            minutosNoturnos++;
-        }
+function calcularMinutosNoturnos(inicio, fim) {
+    let total = 0;
+    for (let m = inicio; m < fim; m++) {
+        const minDia = m % (24 * 60);
+        if (minDia >= 1380 || minDia < 300) total++;
     }
-    return minutosNoturnos;
+    return total;
 }
 
 function atualizarTotalHoras() {
     const linhas = tabelaHoras.querySelectorAll('tr');
-    let totalMinutos = 0;
+    let totalMin = parseInt(saldoAnteriorInput.value) || 0;
+
     linhas.forEach(linha => {
-        const textoHoras = linha.children[3].textContent;
-        const partes = textoHoras.match(/(\d+)h\s*(\d+)min/);
-        if (partes) {
-            const horas = parseInt(partes[1]);
-            const minutos = parseInt(partes[2]);
-            totalMinutos += horas * 60 + minutos;
-        }
+        const match = linha.children[3].textContent.match(/(\d+)h\s*(\d+)min/);
+        if (match) totalMin += parseInt(match[1]) * 60 + parseInt(match[2]);
     });
 
-    const totalHoras = Math.floor(totalMinutos / 60);
-    const totalMin = totalMinutos % 60;
-    document.getElementById('total-horas').textContent = `${totalHoras}h ${totalMin}min`;
+    const horas = Math.floor(totalMin / 60);
+    const min = totalMin % 60;
+    document.getElementById('total-horas').textContent = `${horas}h ${min}min`;
 
-    const metaMinutos = 160 * 60;
-    const diferenca = totalMinutos - metaMinutos;
-    const campoDiferenca = document.getElementById('horas-faltantes');
-    campoDiferenca.className = '';
+    const diff = totalMin - 160 * 60;
+    const campo = document.getElementById('horas-faltantes');
+    campo.className = '';
 
-    if (diferenca === 0) {
-        campoDiferenca.textContent = "Meta atingida!";
-    } else {
-        const difHoras = Math.floor(Math.abs(diferenca) / 60);
-        const difMin = Math.abs(diferenca) % 60;
-        campoDiferenca.textContent = `${difHoras}h ${difMin}min ${diferenca > 0 ? 'excedentes' : 'faltando'}`;
-        campoDiferenca.classList.add(diferenca > 0 ? 'positivo' : 'negativo');
+    if (diff === 0) campo.textContent = 'Meta atingida!';
+    else {
+        const h = Math.floor(Math.abs(diff) / 60);
+        const m = Math.abs(diff) % 60;
+        campo.textContent = `${h}h ${m}min ${diff > 0 ? 'excedentes' : 'faltando'}`;
+        campo.classList.add(diff > 0 ? 'positivo' : 'negativo');
     }
 }
 
 function salvarDados() {
     if (!mesSelecionadoAtual || !usuarioAtual) return;
 
-    const linhas = tabelaHoras.querySelectorAll('tr');
     const registros = [];
-    linhas.forEach(linha => {
+    tabelaHoras.querySelectorAll('tr').forEach(linha => {
         registros.push({
             dia: linha.children[0].textContent,
             inicio: linha.children[1].textContent,
@@ -192,43 +172,33 @@ function salvarDados() {
         });
     });
 
-    firebase.firestore()
-        .collection("usuarios")
-        .doc(usuarioAtual.uid)
-        .collection("registros")
-        .doc(mesSelecionadoAtual)
-        .set({ registros })
-        .then(() => console.log("Dados salvos no Firestore"))
-        .catch(erro => console.error("Erro ao salvar:", erro));
+    firebase.firestore().collection('usuarios').doc(usuarioAtual.uid)
+        .collection('registros').doc(mesSelecionadoAtual)
+        .set({ registros, saldo: parseInt(saldoAnteriorInput.value) || 0 });
 }
 
 function carregarDados() {
     tabelaHoras.innerHTML = '';
-    if (!mesSelecionadoAtual || !usuarioAtual) return;
+    saldoAnteriorInput.value = '';
 
-    firebase.firestore()
-        .collection("usuarios")
-        .doc(usuarioAtual.uid)
-        .collection("registros")
-        .doc(mesSelecionadoAtual)
+    firebase.firestore().collection('usuarios').doc(usuarioAtual.uid)
+        .collection('registros').doc(mesSelecionadoAtual)
         .get()
         .then(doc => {
             if (doc.exists) {
-                const registros = doc.data().registros || [];
-                registros.forEach(reg => {
-                    adicionarLinhaTabela(reg.dia, reg.inicio, reg.fim);
-                });
-                atualizarTotalHoras();
+                const dados = doc.data();
+                (dados.registros || []).forEach(reg => adicionarLinhaTabela(reg.dia, reg.inicio, reg.fim));
+                saldoAnteriorInput.value = dados.saldo || 0;
             }
-        })
-        .catch(erro => console.error("Erro ao carregar dados:", erro));
+            atualizarTotalHoras();
+        });
 }
 
-function nomeMes(numeroMes) {
-    const meses = {
+function nomeMes(m) {
+    return {
         "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril",
         "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto",
         "09": "Setembro", "10": "Outubro", "11": "Novembro", "12": "Dezembro"
-    };
-    return meses[numeroMes] || "Mês inválido";
+    }[m] || 'Mês inválido';
 }
+

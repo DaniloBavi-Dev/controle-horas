@@ -52,6 +52,10 @@ input, select {
     transition: border-color 0.3s;
 }
 
+#saldo-anterior {
+    margin-bottom: 20px;
+}
+
 input:focus, select:focus {
     border-color: #4CAF50;
     outline: none;
@@ -164,15 +168,14 @@ td button {
     font-size: 14px;
     color: #666;
     border-top: 1px solid #ddd;
-    margin: 40px auto 0 auto;
+    margin-top: 40px;
     background-color: #fafafa;
     width: 100%;
     max-width: 500px;
     border-radius: 0 0 12px 12px;
 }
 
-
-/* Responsividade para telas muito pequenas */
+/* Responsividade para telas pequenas */
 @media (max-width: 400px) {
     section {
         margin: 20px;
