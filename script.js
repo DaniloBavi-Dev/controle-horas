@@ -1,4 +1,3 @@
-// script.js atualizado completo
 const btnGoogle = document.getElementById('btn-google');
 const telaLogin = document.getElementById('tela-login');
 const telaSelecaoMes = document.getElementById('tela-selecao-mes');
@@ -19,6 +18,7 @@ const btnEditarSaldo = document.getElementById('btn-editar-saldo');
 let usuarioAtual = null;
 let mesSelecionadoAtual = null;
 let saldoMinutos = 0;
+let metaMinutos = 160 * 60;
 
 btnGoogle.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -83,6 +83,7 @@ btnSalvarSaldo.addEventListener('click', () => {
         return;
     }
     saldoMinutos = converterHoraParaMinutos(valor);
+    metaMinutos = 160 * 60 + saldoMinutos;
     saldoAnteriorInput.disabled = true;
     btnSalvarSaldo.style.display = 'none';
     btnEditarSaldo.style.display = 'inline-block';
@@ -154,7 +155,7 @@ function calcularMinutosNoturnos(inicio, fim) {
 
 function atualizarTotalHoras() {
     const linhas = tabelaHoras.querySelectorAll('tr');
-    let totalMin = saldoMinutos;
+    let totalMin = 0;
 
     linhas.forEach(linha => {
         const match = linha.children[3].textContent.match(/(\d+)h\s*(\d+)min/);
@@ -165,7 +166,7 @@ function atualizarTotalHoras() {
     const min = totalMin % 60;
     document.getElementById('total-horas').textContent = `${horas}h ${min}min`;
 
-    const diff = totalMin - 160 * 60;
+    const diff = totalMin - metaMinutos;
     const campo = document.getElementById('horas-faltantes');
     campo.className = '';
 
@@ -199,6 +200,7 @@ function carregarDados() {
     tabelaHoras.innerHTML = '';
     saldoAnteriorInput.value = '';
     saldoMinutos = 0;
+    metaMinutos = 160 * 60;
     saldoAnteriorInput.disabled = false;
     btnSalvarSaldo.style.display = 'inline-block';
     btnEditarSaldo.style.display = 'none';
@@ -211,6 +213,7 @@ function carregarDados() {
                 const dados = doc.data();
                 (dados.registros || []).forEach(reg => adicionarLinhaTabela(reg.dia, reg.inicio, reg.fim));
                 saldoMinutos = dados.saldo || 0;
+                metaMinutos = 160 * 60 + saldoMinutos;
                 saldoAnteriorInput.value = converterMinutosParaHora(saldoMinutos);
                 saldoAnteriorInput.disabled = true;
                 btnSalvarSaldo.style.display = 'none';
